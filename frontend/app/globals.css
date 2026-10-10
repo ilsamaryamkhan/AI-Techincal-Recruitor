@@ -1,3 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root { color-scheme: light; }
+
+html, body {
+  background: #FFFFFF;
+  color: #111317;
+  font-family: '"Schibsted Grotesk"', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- shared building blocks ---- */
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-page px-6; }
+
+  /* primary: black, inverts to white on hover; subtle press */
+  .btn-dark {
+    @apply inline-flex items-center justify-center rounded-pill border border-ink bg-ink px-5 py-2.5
+           text-sm font-medium text-paper transition-all duration-200
+           hover:bg-paper hover:text-ink active:translate-y-px;
+  }
+  /* ghost: white, inverts to black on hover */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-pill border border-line bg-transparent
+           px-5 py-2.5 text-sm font-medium text-ink transition-all duration-200
+           hover:border-ink hover:bg-ink hover:text-paper active:translate-y-px;
+  }
+  .field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-ink
+           outline-none transition-colors placeholder:text-muted focus:border-ink/40;
+  }
+  .panel { @apply rounded-2xl border border-line bg-sand; }
+}
+
+/* ---- interaction polish: lift + nav underline ---- */
+.lift { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -18px rgba(17, 19, 23, .22);
+  border-color: rgba(17, 19, 23, .16);
+}
+.lift:active { transform: translateY(-1px); }
+
+.navlink { position: relative; transition: color .18s ease, transform .18s ease; }
+.navlink:hover { transform: translateY(-1px); }
+.navlink::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -5px; height: 1.5px;
+  background: currentColor; opacity: .75; transform: scaleX(0); transform-origin: left;
+  transition: transform .22s ease;
+}
+.navlink:hover::after { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lift, .navlink, .navlink::after { transition: none; }
+  .lift:hover { transform: none; }
+}
+
+/* ---- hero letter-load animation ---- */
+.hero-line { display: inline-block; }
+.hero-letter {
+  display: inline-block;
+  color: var(--ink, #111317);
+  white-space: pre;
+  animation: letterIn 1.5s cubic-bezier(.2,.7,.2,1) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes letterIn {
+  0%   { opacity: 0; transform: translateY(0.22em); color: var(--c); }
+  28%  { opacity: 1; transform: translateY(0);      color: var(--c); }
+  100% { opacity: 1; transform: translateY(0);      color: #111317; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-letter { animation: none; color: #111317; opacity: 1; transform: none; }
+}
+
+/* ---- company wordmark marquee (continuous slide) ---- */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 34s linear infinite;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}

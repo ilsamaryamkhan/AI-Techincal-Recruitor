@@ -93,7 +93,7 @@
             "line": 4
           },
           "why_it_looks_wrong": "The early `return True` looks like it could miss later pairs.",
-          "why_its_actually_fine": "Returning on the first found pair is correct \u2014 the function only needs existence, not all pairs."
+          "why_its_actually_fine": "Returning on the first found pair is correct — the function only needs existence, not all pairs."
         }
       ],
       "verification": {
@@ -157,6 +157,13 @@
         "generated_by": "seed_authored",
         "seed_exemplars": [],
         "created_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "python_perf",
+        "entry": "has_pair_with_sum",
+        "reference": "def has_pair_with_sum(nums, target):\n    seen=set()\n    for n in nums:\n        if target-n in seen: return True\n        seen.add(n)\n    return False\n",
+        "setup": "args = (list(range(0,40000,2)), 40001)",
+        "min_ratio": 20
       }
     },
     {
@@ -292,6 +299,12 @@
         "generated_by": "seed_authored",
         "seed_exemplars": [],
         "created_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "python_diff",
+        "entry": "add_to_cart",
+        "reference": "def add_to_cart(item, cart=None):\n    if cart is None: cart=[]\n    cart.append(item); return cart\n",
+        "probe": "add_to_cart('apple')\nresult = add_to_cart('banana')"
       }
     },
     {
@@ -379,7 +392,7 @@
             "line": 4
           },
           "why_it_looks_wrong": "`mid = (lo + hi) // 2` is the famous integer-overflow binary-search bug.",
-          "why_its_actually_fine": "Python ints are arbitrary-precision, so there is no overflow here \u2014 flagging it shows pattern-matching, not reasoning about this language."
+          "why_its_actually_fine": "Python ints are arbitrary-precision, so there is no overflow here — flagging it shows pattern-matching, not reasoning about this language."
         }
       ],
       "verification": {
@@ -432,6 +445,12 @@
         "generated_by": "seed_authored",
         "seed_exemplars": [],
         "created_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "python_diff",
+        "entry": "binary_search",
+        "reference": "def binary_search(arr, target):\n    lo, hi = 0, len(arr)-1\n    while lo <= hi:\n        mid=(lo+hi)//2\n        if arr[mid]==target: return mid\n        elif arr[mid]<target: lo=mid+1\n        else: hi=mid-1\n    return -1\n",
+        "probe": "result = binary_search([1,3,5,7,9], 9)"
       }
     },
     {
@@ -520,7 +539,7 @@
             "line": 1
           },
           "why_it_looks_wrong": "A scalar SUM with no GROUP BY can look like it's missing a grouping clause.",
-          "why_its_actually_fine": "A single aggregate over the whole result set needs no GROUP BY \u2014 that is not the defect."
+          "why_its_actually_fine": "A single aggregate over the whole result set needs no GROUP BY — that is not the defect."
         }
       ],
       "verification": {
@@ -565,6 +584,11 @@
         "generated_by": "seed_authored",
         "seed_exemplars": [],
         "created_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "sql_diff",
+        "schema": "CREATE TABLE orders(id INT, customer_id INT, total REAL);CREATE TABLE order_tags(order_id INT, tag TEXT);INSERT INTO orders VALUES (10,1,5000),(11,1,3000),(12,2,2000);INSERT INTO order_tags VALUES (10,'urgent'),(10,'gift'),(10,'fragile'),(11,'urgent');",
+        "correct": "SELECT SUM(total) FROM orders"
       }
     },
     {
@@ -684,6 +708,977 @@
             "o3"
           ]
         }
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "sql_diff",
+        "schema": "CREATE TABLE customers(id INT, name TEXT);CREATE TABLE orders(id INT, customer_id INT);INSERT INTO customers VALUES (1,'Ayesha'),(2,'Bilal'),(3,'Chaudhry');INSERT INTO orders VALUES (10,1),(11,1),(12,2);",
+        "correct": "SELECT c.name, COUNT(o.id) FROM customers c LEFT JOIN orders o ON c.id=o.customer_id GROUP BY c.name"
+      }
+    },
+    {
+      "item_id": "CE-E1",
+      "company_id": "systems",
+      "domain": "core_se",
+      "level": "engineer",
+      "role_tags": [
+        "backend",
+        "engineer_se"
+      ],
+      "mode": "comprehension",
+      "language": "python",
+      "blueprint_ref": "bp_systems_core_se_engineer",
+      "prompt": "Read this function. Explain what it does, its complexity, and anything you'd flag.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.py",
+            "content": "def first_duplicate(nums):\n    seen = []\n    for n in nums:\n        if n in seen:\n            return n\n        seen.append(n)\n    return None\n"
+          }
+        ],
+        "entrypoint": "solution.py"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "EFF-LIST-IN-LOOP",
+        "category": "efficiency",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "`seen` is a list, so `n in seen` is an O(n) scan inside the loop -> O(n^2) overall.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Returns the first value that appears twice, else None.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "Membership test on a list makes it O(n^2); it looks like the O(n) set idiom but isn't.",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: make `seen` a set for O(1) membership and O(n) overall.",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Space is O(n).",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Returning on the first repeat is correct.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "The early return could look like it misses later duplicates.",
+          "why_its_actually_fine": "Returning the first duplicate is exactly the stated behaviour."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "python_perf",
+        "entry": "first_duplicate",
+        "reference": "def first_duplicate(nums):\n    seen=set()\n    for n in nums:\n        if n in seen: return n\n        seen.add(n)\n    return None\n",
+        "setup": "args = (list(range(20000)),)",
+        "min_ratio": 20
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "CE-E2",
+      "company_id": "folio3",
+      "domain": "core_se",
+      "level": "engineer",
+      "role_tags": [
+        "backend",
+        "engineer_se"
+      ],
+      "mode": "comprehension",
+      "language": "python",
+      "blueprint_ref": "bp_folio3_core_se_engineer",
+      "prompt": "Read this function. Explain what it computes and whether it is correct.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.py",
+            "content": "def sum_first_k(arr, k):\n    total = 0\n    i = 0\n    while i < k - 1:\n        total += arr[i]\n        i += 1\n    return total\n"
+          }
+        ],
+        "entrypoint": "solution.py"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "CORR-OFF-BY-ONE",
+        "category": "correctness",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "Loop runs while `i < k-1`, so it sums only the first k-1 elements instead of k.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Means to sum the first k elements of arr.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "`while i < k - 1` stops one short, summing k-1 elements, not k.",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: use `while i < k`.",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Concrete case: sum_first_k([1,2,3,4,5], 3) returns 3, should be 6.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Complexity is O(k); the defect is correctness.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "Starting `total` at 0 could look like it mishandles empty input.",
+          "why_its_actually_fine": "0 is the correct identity for a sum; empty/zero-k returns 0 fine."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "python_diff",
+        "entry": "sum_first_k",
+        "reference": "def sum_first_k(arr, k):\n    total=0\n    i=0\n    while i < k:\n        total += arr[i]; i += 1\n    return total\n",
+        "probe": "result = sum_first_k([1,2,3,4,5], 3)"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "CE-S1",
+      "company_id": "confiz",
+      "domain": "core_se",
+      "level": "senior",
+      "role_tags": [
+        "backend",
+        "senior_se"
+      ],
+      "mode": "comprehension",
+      "language": "python",
+      "blueprint_ref": "bp_confiz_core_se_senior",
+      "prompt": "Read this function. Explain its behaviour, complexity, and anything you'd raise in review.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.py",
+            "content": "def dedupe(items):\n    result = []\n    for x in items:\n        if x not in result:\n            result.append(x)\n    return result\n"
+          }
+        ],
+        "entrypoint": "solution.py"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "EFF-LIST-IN-LOOP",
+        "category": "efficiency",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "`x not in result` scans a list each iteration -> O(n^2); order-preserving dedupe can be O(n) with a set.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Removes duplicates while preserving first-seen order.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "`not in result` is an O(n) list scan inside the loop, so it's O(n^2).",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: track seen elements in a set for O(1) membership, still appending to the ordered result.",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Output order is correct.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Space is O(n).",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "Appending to `result` while iterating looks like mutation-during-iteration.",
+          "why_its_actually_fine": "It iterates `items`, not `result`, so there is no mutation-during-iteration bug."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "python_perf",
+        "entry": "dedupe",
+        "reference": "def dedupe(items):\n    seen=set(); result=[]\n    for x in items:\n        if x not in seen:\n            seen.add(x); result.append(x)\n    return result\n",
+        "setup": "args = (list(range(20000)),)",
+        "min_ratio": 20
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "CE-S2",
+      "company_id": "venturedive",
+      "domain": "core_se",
+      "level": "senior",
+      "role_tags": [
+        "backend",
+        "senior_se"
+      ],
+      "mode": "comprehension",
+      "language": "python",
+      "blueprint_ref": "bp_venturedive_core_se_senior",
+      "prompt": "Read this function. Explain its behaviour across repeated calls and flag any issue.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.py",
+            "content": "def tally(key, counts={}):\n    counts[key] = counts.get(key, 0) + 1\n    return counts\n"
+          }
+        ],
+        "entrypoint": "solution.py"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "OOP-MUTABLE-DEFAULT",
+        "category": "design_oop",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "Default `counts={}` is created once at definition; all default-arg calls share and mutate the same dict.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Increments a per-key counter and returns the dict.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "The default {} is shared across calls, so counts persist between independent calls that omit `counts`.",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: default to None and create a fresh dict inside when counts is None.",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Only bites when the caller omits `counts`.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Classic mutable-default-argument pitfall, with a dict.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "Using `.get(key, 0)` could look like it hides a KeyError.",
+          "why_its_actually_fine": "`.get` with a default is the idiomatic, correct way to initialise a count."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "python_diff",
+        "entry": "tally",
+        "reference": "def tally(key, counts=None):\n    if counts is None: counts={}\n    counts[key]=counts.get(key,0)+1\n    return counts\n",
+        "probe": "tally('a')\nresult = tally('b')"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "DB-A1",
+      "company_id": "i2c",
+      "domain": "database",
+      "level": "associate",
+      "role_tags": [
+        "backend",
+        "associate_se"
+      ],
+      "mode": "comprehension",
+      "language": "sql",
+      "blueprint_ref": "bp_i2c_database_associate",
+      "prompt": "This query should total all payments received. Explain the result it actually produces.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.sql",
+            "content": "SELECT SUM(p.amount)\nFROM payments p\nJOIN line_items l ON p.order_id = l.order_id;\n"
+          }
+        ],
+        "entrypoint": "solution.sql"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "DB-WRONG-JOIN",
+        "category": "database",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "Joining payments (1) to line_items (many) fans each payment out per line item, so SUM(p.amount) over-counts.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Intends to sum every payment's amount.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "The join to line_items is one-to-many, duplicating each payment row per line item, inflating the SUM.",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: sum from payments alone, or aggregate line_items in a subquery.",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Inflation scales with line items per order.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "No GROUP BY is needed for a single total.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "A scalar SUM with no GROUP BY can look like a missing grouping.",
+          "why_its_actually_fine": "A single aggregate over the whole set needs no GROUP BY — not the defect."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "sql_diff",
+        "schema": "CREATE TABLE payments(id INT, order_id INT, amount REAL);CREATE TABLE line_items(order_id INT, sku TEXT);INSERT INTO payments VALUES (1,10,500),(2,11,300);INSERT INTO line_items VALUES (10,'a'),(10,'b'),(11,'c');",
+        "correct": "SELECT SUM(amount) FROM payments"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "DB-A2",
+      "company_id": "systems",
+      "domain": "database",
+      "level": "associate",
+      "role_tags": [
+        "backend",
+        "associate_se"
+      ],
+      "mode": "comprehension",
+      "language": "sql",
+      "blueprint_ref": "bp_systems_database_associate",
+      "prompt": "This query should list each product with how many times it was ordered, including never-ordered products. Explain what it returns.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.sql",
+            "content": "SELECT pr.name, COUNT(*)\nFROM products pr\nLEFT JOIN order_lines ol ON pr.id = ol.product_id\nGROUP BY pr.name;\n"
+          }
+        ],
+        "entrypoint": "solution.sql"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "DB-GROUPBY-ERR",
+        "category": "database",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "COUNT(*) counts the NULL-padded LEFT JOIN row for a never-ordered product as 1 instead of 0.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Counts orders per product, keeping products with none.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "COUNT(*) counts the single NULL-padded row a LEFT JOIN emits, so a never-ordered product shows 1, not 0.",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: COUNT(ol.product_id) (a non-null column from the order side).",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "The LEFT JOIN and GROUP BY are otherwise fine.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Shows the COUNT(*) vs COUNT(col) difference under NULLs.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "`GROUP BY pr.name` could be flagged if two products share a name.",
+          "why_its_actually_fine": "A fair robustness note, but not the bug under test here."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "sql_diff",
+        "schema": "CREATE TABLE products(id INT, name TEXT);CREATE TABLE order_lines(id INT, product_id INT);INSERT INTO products VALUES (1,'Pen'),(2,'Mug'),(3,'Lamp');INSERT INTO order_lines VALUES (10,1),(11,1),(12,2);",
+        "correct": "SELECT pr.name, COUNT(ol.product_id) FROM products pr LEFT JOIN order_lines ol ON pr.id=ol.product_id GROUP BY pr.name"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "DB-S1",
+      "company_id": "folio3",
+      "domain": "database",
+      "level": "senior",
+      "role_tags": [
+        "backend",
+        "senior_se"
+      ],
+      "mode": "comprehension",
+      "language": "sql",
+      "blueprint_ref": "bp_folio3_database_senior",
+      "prompt": "This query should report total invoiced revenue. Explain the result it actually produces.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.sql",
+            "content": "SELECT SUM(i.amount)\nFROM invoices i\nJOIN invoice_items it ON i.id = it.invoice_id;\n"
+          }
+        ],
+        "entrypoint": "solution.sql"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "DB-WRONG-JOIN",
+        "category": "database",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "Invoices (1) joined to invoice_items (many) fans each invoice out per line, so SUM(i.amount) is inflated.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Intends to total all invoiced revenue.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "The one-to-many join duplicates each invoice row per line item, so the SUM over-counts.",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: sum from invoices alone, or aggregate invoice_items separately.",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "An invoice with 3 lines is counted 3x.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Correct total differs from the inflated one.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "Aliasing invoices as `i` could look like a reserved-word clash.",
+          "why_its_actually_fine": "`i` is a fine alias; it is not the defect."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "sql_diff",
+        "schema": "CREATE TABLE invoices(id INT, client_id INT, amount REAL);CREATE TABLE invoice_items(invoice_id INT, line TEXT);INSERT INTO invoices VALUES (1,7,9000),(2,7,1000);INSERT INTO invoice_items VALUES (1,'x'),(1,'y'),(2,'z');",
+        "correct": "SELECT SUM(amount) FROM invoices"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "DB-S2",
+      "company_id": "confiz",
+      "domain": "database",
+      "level": "senior",
+      "role_tags": [
+        "backend",
+        "senior_se"
+      ],
+      "mode": "comprehension",
+      "language": "sql",
+      "blueprint_ref": "bp_confiz_database_senior",
+      "prompt": "This query should list each team with its member count, including empty teams. Explain what it returns.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.sql",
+            "content": "SELECT t.name, COUNT(*)\nFROM teams t\nLEFT JOIN members m ON t.id = m.team_id\nGROUP BY t.name;\n"
+          }
+        ],
+        "entrypoint": "solution.sql"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "DB-GROUPBY-ERR",
+        "category": "database",
+        "location": {
+          "file": "solution.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": ""
+        },
+        "description": "COUNT(*) counts the NULL-padded LEFT JOIN row for an empty team as 1 instead of 0.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Counts members per team, keeping empty teams.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "COUNT(*) counts the NULL-padded row for an empty team as 1 rather than 0.",
+          "required": true,
+          "concept_tags": [
+            "core"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: COUNT(m.id) so NULLs from the members side are not counted.",
+          "required": true,
+          "concept_tags": [
+            "fix"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Only the COUNT argument is wrong.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Demonstrates COUNT(*) vs COUNT(col) under NULLs.",
+          "required": false,
+          "concept_tags": [
+            "detail"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 1
+          },
+          "why_it_looks_wrong": "The LEFT JOIN direction could look reversed.",
+          "why_its_actually_fine": "teams LEFT JOIN members is correct for keeping every team."
+        }
+      ],
+      "verification": {
+        "method": [
+          "oracle"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "check": {
+        "kind": "sql_diff",
+        "schema": "CREATE TABLE teams(id INT, name TEXT);CREATE TABLE members(id INT, team_id INT);INSERT INTO teams VALUES (1,'Alpha'),(2,'Beta'),(3,'Gamma');INSERT INTO members VALUES (10,1),(11,1),(12,2);",
+        "correct": "SELECT t.name, COUNT(m.id) FROM teams t LEFT JOIN members m ON t.id=m.team_id GROUP BY t.name"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {}
       },
       "irt": {
         "a": null,

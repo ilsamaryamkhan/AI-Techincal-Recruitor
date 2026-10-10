@@ -1,23 +1,19 @@
+﻿# secrets
+.env
+*.env
+!.env.example
+
 # python
-__pycache__/
-*.py[cod]
 .venv/
-venv/
-*.egg-info/
-.pytest_cache/
-# node
+__pycache__/
+*.pyc
+*.db
+
+# node / next
 node_modules/
 .next/
-out/
-# env & secrets
-.env
-.env.local
-# models & data artifacts
-*.pt
-*.onnx
-models/
-media/
-# os / editor
+tsconfig.tsbuildinfo
+
+# os / misc
 .DS_Store
-*.log
-*.db
+_to_delete/

@@ -27,14 +27,20 @@ def load_seed_bank(path: str | None = None) -> dict:
 
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
-    companies_seen, n_items = set(), 0
+    n_items = 0
     try:
+        # one set tracks every company id already present or queued, so we never
+        # add a duplicate (pending adds aren't visible to db.get until flush).
+        existing = {c.id for c in db.query(Company).all()}
+        # seed all 10 demo companies up front (signup dropdown + pool stay full,
+        # even though only some currently have items)
+        for cid, cname in COMPANY_NAMES.items():
+            if cid not in existing:
+                db.add(Company(id=cid, name=cname)); existing.add(cid)
         for it in items:
             cid = it["company_id"]
-            if cid not in companies_seen:
-                companies_seen.add(cid)
-                if not db.get(Company, cid):
-                    db.add(Company(id=cid, name=COMPANY_NAMES.get(cid, cid.title())))
+            if cid not in existing:
+                db.add(Company(id=cid, name=COMPANY_NAMES.get(cid, cid.title()))); existing.add(cid)
             row = db.get(Item, it["item_id"])
             if row:                                   # update
                 row.company_id, row.domain, row.level = cid, it["domain"], it["level"]
@@ -46,9 +52,10 @@ def load_seed_bank(path: str | None = None) -> dict:
                 ))
             n_items += 1
         db.commit()
+        total_companies = db.query(Company).count()
     finally:
         db.close()
-    summary = {"companies": len(companies_seen), "items": n_items}
+    summary = {"companies": total_companies, "items": n_items}
     print(f"seeded {summary['items']} items across {summary['companies']} companies from {path}")
     return summary
 

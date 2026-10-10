@@ -42,7 +42,8 @@ CANDIDATE_FIELDS = {
     "mode", "language", "prompt", "artifact",
 }
 # Fields that carry the answer — asserted-absent in tests so a refactor can't leak them.
-ANSWER_FIELDS = {"fault_label", "verification", "decoys", "expected_observations", "rubric"}
+# `check` holds the executable reference fix, so it is answer-bearing too.
+ANSWER_FIELDS = {"fault_label", "verification", "decoys", "expected_observations", "rubric", "check"}
 
 def to_candidate_view(payload: dict) -> dict:
     """Project a full GeneratedItem down to only what a candidate may receive."""
