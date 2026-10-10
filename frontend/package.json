@@ -15,7 +15,6 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@next/swc-win32-x64-msvc": "^14.2.25",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "autoprefixer": "^10.4.19",
@@ -24,5 +23,8 @@
     "postcss": "^8.4.40",
     "tailwindcss": "^3.4.7",
     "typescript": "^5.5.4"
+  },
+  "optionalDependencies": {
+    "@next/swc-win32-x64-msvc": "^14.2.5"
   }
 }
