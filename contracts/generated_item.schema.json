@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeneratedItem",
+  "type": "object",
+  "required": [
+    "item_id",
+    "company_id",
+    "domain",
+    "level",
+    "mode",
+    "language",
+    "prompt",
+    "artifact",
+    "fault_label",
+    "expected_observations",
+    "decoys",
+    "verification",
+    "rubric"
+  ],
+  "properties": {
+    "item_id": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string"
+    },
+    "domain": {
+      "enum": [
+        "core_se",
+        "web",
+        "database",
+        "qa",
+        "ml"
+      ]
+    },
+    "level": {
+      "enum": [
+        "associate",
+        "engineer",
+        "senior"
+      ]
+    },
+    "role_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mode": {
+      "enum": [
+        "comprehension",
+        "solve",
+        "debug",
+        "optimize"
+      ]
+    },
+    "language": {
+      "type": "string"
+    },
+    "blueprint_ref": {
+      "type": "string"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "files"
+      ],
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "content"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "entrypoint": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "fault_label": {
+      "type": "object",
+      "description": "SERVER-ONLY",
+      "required": [
+        "present"
+      ],
+      "properties": {
+        "present": {
+          "type": "boolean"
+        },
+        "fault_id": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object"
+        },
+        "description": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      }
+    },
+    "decoys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "location",
+          "why_it_looks_wrong",
+          "why_its_actually_fine"
+        ]
+      }
+    },
+    "expected_observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "obs_id",
+          "statement",
+          "required",
+          "concept_tags"
+        ],
+        "properties": {
+          "obs_id": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "concept_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "description": "SERVER-ONLY",
+      "required": [
+        "method",
+        "status"
+      ],
+      "properties": {
+        "method": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "hidden_test",
+              "static",
+              "query_diff",
+              "perf_test",
+              "mutation",
+              "second_llm_probe"
+            ]
+          }
+        },
+        "status": {
+          "enum": [
+            "verified",
+            "rejected",
+            "pending"
+          ]
+        },
+        "verified_at": {
+          "type": "string"
+        }
+      }
+    },
+    "rubric": {
+      "type": "object"
+    },
+    "irt": {
+      "type": "object"
+    },
+    "novelty": {
+      "type": "object"
+    },
+    "provenance": {
+      "type": "object"
+    }
+  }
+}

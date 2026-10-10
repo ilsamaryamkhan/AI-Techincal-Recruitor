@@ -1,0 +1,8 @@
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+pydantic==2.*
+# heavy — install when wiring scoring:
+# transformers
+# torch
+# tree-sitter
+# tree-sitter-languages

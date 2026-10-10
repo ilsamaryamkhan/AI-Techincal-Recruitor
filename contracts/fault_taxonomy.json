@@ -1,0 +1,249 @@
+{
+  "version": "0.1",
+  "verified_by": [
+    "hidden_test",
+    "static",
+    "query_diff",
+    "perf_test",
+    "mutation",
+    "second_llm_probe"
+  ],
+  "faults": [
+    {
+      "fault_id": "CORR-OFF-BY-ONE",
+      "category": "correctness",
+      "domains": [
+        "core_se"
+      ],
+      "verified_by": [
+        "hidden_test"
+      ],
+      "must_name": "wrong boundary; the exact input that breaks it"
+    },
+    {
+      "fault_id": "CORR-MISSING-BASE",
+      "category": "correctness",
+      "domains": [
+        "core_se"
+      ],
+      "verified_by": [
+        "hidden_test"
+      ],
+      "must_name": "missing base/edge case (empty, single, null)"
+    },
+    {
+      "fault_id": "CORR-WRONG-COND",
+      "category": "correctness",
+      "domains": [
+        "core_se",
+        "web"
+      ],
+      "verified_by": [
+        "hidden_test"
+      ],
+      "must_name": "wrong operator/condition and its effect"
+    },
+    {
+      "fault_id": "EFF-LIST-IN-LOOP",
+      "category": "efficiency",
+      "domains": [
+        "core_se"
+      ],
+      "verified_by": [
+        "static",
+        "perf_test"
+      ],
+      "must_name": "true complexity vs apparent; the fix"
+    },
+    {
+      "fault_id": "EFF-REDUNDANT-RECOMP",
+      "category": "efficiency",
+      "domains": [
+        "core_se",
+        "ml"
+      ],
+      "verified_by": [
+        "perf_test"
+      ],
+      "must_name": "repeated work; memo/caching fix"
+    },
+    {
+      "fault_id": "CONC-RACE",
+      "category": "concurrency",
+      "domains": [
+        "core_se"
+      ],
+      "verified_by": [
+        "second_llm_probe",
+        "static"
+      ],
+      "must_name": "non-atomic check-then-act; failing interleaving"
+    },
+    {
+      "fault_id": "OOP-BROKEN-ENCAP",
+      "category": "design_oop",
+      "domains": [
+        "core_se"
+      ],
+      "verified_by": [
+        "static"
+      ],
+      "must_name": "leaked internal state; invariant at risk"
+    },
+    {
+      "fault_id": "OOP-WRONG-PATTERN",
+      "category": "design_oop",
+      "domains": [
+        "core_se"
+      ],
+      "verified_by": [
+        "second_llm_probe"
+      ],
+      "must_name": "pattern named vs actually implemented"
+    },
+    {
+      "fault_id": "OOP-MUTABLE-DEFAULT",
+      "category": "design_oop",
+      "domains": [
+        "core_se"
+      ],
+      "verified_by": [
+        "hidden_test"
+      ],
+      "must_name": "shared mutable default; cross-call bleed"
+    },
+    {
+      "fault_id": "SEC-SQL-INJECTION",
+      "category": "security",
+      "domains": [
+        "web",
+        "database"
+      ],
+      "verified_by": [
+        "static"
+      ],
+      "must_name": "untrusted input in query; parameterization fix"
+    },
+    {
+      "fault_id": "SEC-MISSING-VALIDATION",
+      "category": "security",
+      "domains": [
+        "web"
+      ],
+      "verified_by": [
+        "static"
+      ],
+      "must_name": "unvalidated input path"
+    },
+    {
+      "fault_id": "DB-WRONG-JOIN",
+      "category": "database",
+      "domains": [
+        "database"
+      ],
+      "verified_by": [
+        "query_diff"
+      ],
+      "must_name": "join type inflates/drops rows; row-count effect"
+    },
+    {
+      "fault_id": "DB-GROUPBY-ERR",
+      "category": "database",
+      "domains": [
+        "database"
+      ],
+      "verified_by": [
+        "query_diff"
+      ],
+      "must_name": "non-grouped column / wrong aggregate scope"
+    },
+    {
+      "fault_id": "DB-NORMALIZATION",
+      "category": "database",
+      "domains": [
+        "database"
+      ],
+      "verified_by": [
+        "second_llm_probe"
+      ],
+      "must_name": "which normal form is violated and why"
+    },
+    {
+      "fault_id": "WEB-STALE-CLOSURE",
+      "category": "web_state",
+      "domains": [
+        "web"
+      ],
+      "verified_by": [
+        "hidden_test"
+      ],
+      "must_name": "captured stale value; dependency fix"
+    },
+    {
+      "fault_id": "WEB-STATE-MUTATION",
+      "category": "web_state",
+      "domains": [
+        "web"
+      ],
+      "verified_by": [
+        "static"
+      ],
+      "must_name": "direct mutation; why render doesn't update"
+    },
+    {
+      "fault_id": "WEB-MISSING-AWAIT",
+      "category": "web_async",
+      "domains": [
+        "web"
+      ],
+      "verified_by": [
+        "hidden_test"
+      ],
+      "must_name": "unawaited promise; race in result"
+    },
+    {
+      "fault_id": "QA-FLAKY-SELECTOR",
+      "category": "test",
+      "domains": [
+        "qa"
+      ],
+      "verified_by": [
+        "second_llm_probe"
+      ],
+      "must_name": "why selector is non-deterministic"
+    },
+    {
+      "fault_id": "QA-FALSE-POSITIVE",
+      "category": "test",
+      "domains": [
+        "qa"
+      ],
+      "verified_by": [
+        "mutation"
+      ],
+      "must_name": "test passes on broken code; what it fails to assert"
+    },
+    {
+      "fault_id": "ML-DATA-LEAKAGE",
+      "category": "ml",
+      "domains": [
+        "ml"
+      ],
+      "verified_by": [
+        "second_llm_probe"
+      ],
+      "must_name": "train/test contamination; why the metric lies"
+    },
+    {
+      "fault_id": "ML-WRONG-METRIC",
+      "category": "ml",
+      "domains": [
+        "ml"
+      ],
+      "verified_by": [
+        "second_llm_probe"
+      ],
+      "must_name": "metric unsuited to imbalance; correct choice"
+    }
+  ]
+}

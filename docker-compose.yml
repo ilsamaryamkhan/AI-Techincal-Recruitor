@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-codesense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codesense}
+      POSTGRES_DB: ${POSTGRES_DB:-codesense}
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  api:
+    build: ./services/api
+    env_file: .env
+    ports: ["8000:8000"]
+    depends_on: [db, redis]
+    volumes: ["./services/api:/app", "./contracts:/contracts:ro", "./data:/data:ro"]
+
+  frontend:
+    build: ./frontend
+    ports: ["3000:3000"]
+    volumes: ["./frontend:/app", "/app/node_modules"]
+    depends_on: [api]
+
+  # ---- heavy services: bring up individually while working on them ----
+  generation:
+    build: ./services/generation
+    env_file: .env
+    ports: ["8001:8001"]
+    depends_on: [db, redis]
+    volumes: ["./services/generation:/app", "./contracts:/contracts:ro", "./data:/data:ro"]
+
+  scoring:
+    build: ./services/scoring
+    env_file: .env
+    ports: ["8002:8002"]
+    volumes: ["./services/scoring:/app", "./contracts:/contracts:ro", "./data:/data:ro"]
+
+  proctoring:
+    build: ./services/proctoring
+    env_file: .env
+    ports: ["8003:8003"]
+    volumes: ["./services/proctoring:/app", "./contracts:/contracts:ro"]
+
+  interview:
+    build: ./services/interview
+    env_file: .env
+    ports: ["8004:8004"]
+    depends_on: [scoring]
+    volumes: ["./services/interview:/app", "./contracts:/contracts:ro", "./data:/data:ro"]
+
+volumes:
+  pgdata:

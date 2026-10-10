@@ -1,0 +1,704 @@
+{
+  "bank_version": "0.1",
+  "created_at": "2026-10-10T00:00:00Z",
+  "schema": "GeneratedItem v1",
+  "domains": [
+    "core_se",
+    "database"
+  ],
+  "note": "Hand-authored, oracle-verified seed bank for the vertical slice. fault_label and verification are SERVER-ONLY and must be stripped before sending an item to a candidate client.",
+  "items": [
+    {
+      "item_id": "D1-1",
+      "company_id": "devsinc",
+      "domain": "core_se",
+      "level": "associate",
+      "role_tags": [
+        "backend",
+        "associate_se"
+      ],
+      "mode": "comprehension",
+      "language": "python",
+      "blueprint_ref": "bp_devsinc_core_se_associate",
+      "prompt": "Read this function. Explain what it does, its time complexity, and anything you'd flag in review.",
+      "artifact": {
+        "files": [
+          {
+            "path": "solution.py",
+            "content": "def has_pair_with_sum(nums, target):\n    seen = []\n    for n in nums:\n        if target - n in seen:\n            return True\n        seen.append(n)\n    return False\n"
+          }
+        ],
+        "entrypoint": "solution.py"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "EFF-LIST-IN-LOOP",
+        "category": "efficiency",
+        "location": {
+          "file": "solution.py",
+          "line_start": 4,
+          "line_end": 4,
+          "symbol": "has_pair_with_sum"
+        },
+        "description": "`seen` is a list, so `in seen` is an O(n) scan inside the loop -> O(n^2) overall, though it mimics the O(n) hash-set two-sum idiom.",
+        "severity": "medium"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Returns True iff two elements of nums sum to target.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "Real time complexity is O(n^2) because membership test on a list is O(n); it only looks like the O(n) set idiom.",
+          "required": true,
+          "concept_tags": [
+            "complexity_analysis"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: use a set for `seen` to get O(1) membership and O(n) overall.",
+          "required": true,
+          "concept_tags": [
+            "data_structures",
+            "optimization"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Space is O(n); returning True on the first matching pair is correct.",
+          "required": false,
+          "concept_tags": [
+            "space_complexity"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Handles empty input and the x+x same-value pairing correctly.",
+          "required": false,
+          "concept_tags": [
+            "edge_cases"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "solution.py",
+            "line": 4
+          },
+          "why_it_looks_wrong": "The early `return True` looks like it could miss later pairs.",
+          "why_its_actually_fine": "Returning on the first found pair is correct \u2014 the function only needs existence, not all pairs."
+        }
+      ],
+      "verification": {
+        "method": [
+          "perf_test",
+          "hidden_test"
+        ],
+        "hidden_tests": [
+          {
+            "input": "[1,2,3,9], 8",
+            "expected": "False",
+            "fault_triggers": false
+          },
+          {
+            "input": "[1,2,3,9], 12",
+            "expected": "True",
+            "fault_triggers": false
+          },
+          {
+            "input": "[], 5",
+            "expected": "False",
+            "fault_triggers": false
+          }
+        ],
+        "perf_test": {
+          "n": 20000,
+          "observed": "list 1013.8ms vs set 2.7ms",
+          "observed_ratio_x": 370,
+          "threshold_ratio_x": 20,
+          "confirms": "O(n^2)"
+        },
+        "static_findings": [
+          "list-membership inside for-loop over same list"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "rubric": {
+        "detection_weight": 0.35,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.25,
+        "concept_mastery_map": {
+          "complexity_analysis": [
+            "o2"
+          ],
+          "data_structures": [
+            "o3"
+          ]
+        }
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "D1-2",
+      "company_id": "arbisoft",
+      "domain": "core_se",
+      "level": "associate",
+      "role_tags": [
+        "backend",
+        "associate_se",
+        "language_agnostic"
+      ],
+      "mode": "comprehension",
+      "language": "python",
+      "blueprint_ref": "bp_arbisoft_core_se_associate",
+      "prompt": "Read this function. Explain its behaviour across repeated calls and flag any issue.",
+      "artifact": {
+        "files": [
+          {
+            "path": "cart.py",
+            "content": "def add_to_cart(item, cart=[]):\n    cart.append(item)\n    return cart\n"
+          }
+        ],
+        "entrypoint": "cart.py"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "OOP-MUTABLE-DEFAULT",
+        "category": "design_oop",
+        "location": {
+          "file": "cart.py",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": "add_to_cart"
+        },
+        "description": "Default `cart=[]` is evaluated once at definition; all default-arg calls share one list, so state persists across calls.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Appends item to cart and returns it.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "The default [] is created once at function-definition time, so calls that omit cart share and mutate the same list across calls.",
+          "required": true,
+          "concept_tags": [
+            "mutable_default",
+            "python_semantics"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: default to None, then create a new list inside when cart is None.",
+          "required": true,
+          "concept_tags": [
+            "defensive_coding"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "The bug only surfaces when the caller omits cart; passing an explicit list works fine.",
+          "required": false,
+          "concept_tags": [
+            "scoping"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "This is the classic mutable-default-argument pitfall.",
+          "required": false,
+          "concept_tags": [
+            "terminology"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "cart.py",
+            "line": 2
+          },
+          "why_it_looks_wrong": "Mutating the passed-in `cart` parameter in place can look like a side-effect smell.",
+          "why_its_actually_fine": "In-place append of a caller-supplied list is intended; the defect is the default value, not the append."
+        }
+      ],
+      "verification": {
+        "method": [
+          "hidden_test"
+        ],
+        "hidden_tests": [
+          {
+            "input": "add_to_cart('apple') then add_to_cart('banana')",
+            "expected": "second call == ['banana']",
+            "observed": "second call == ['apple','banana']",
+            "fault_triggers": true
+          }
+        ],
+        "static_findings": [
+          "mutable default argument (list literal) on add_to_cart"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {
+          "mutable_default": [
+            "o2"
+          ],
+          "defensive_coding": [
+            "o3"
+          ]
+        }
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "D1-3",
+      "company_id": "10pearls",
+      "domain": "core_se",
+      "level": "associate",
+      "role_tags": [
+        "backend",
+        "associate_se"
+      ],
+      "mode": "comprehension",
+      "language": "python",
+      "blueprint_ref": "bp_10pearls_core_se_associate",
+      "prompt": "Read this search. Explain what it does and whether it is correct for all inputs.",
+      "artifact": {
+        "files": [
+          {
+            "path": "search.py",
+            "content": "def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n"
+          }
+        ],
+        "entrypoint": "search.py"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "CORR-OFF-BY-ONE",
+        "category": "correctness",
+        "location": {
+          "file": "search.py",
+          "line_start": 3,
+          "line_end": 3,
+          "symbol": "binary_search"
+        },
+        "description": "Loop condition `lo < hi` exits when lo == hi, skipping the final single-element window; a target that reduces to that window is missed. Should be `lo <= hi`.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Binary search over a sorted array; returns the index of target or -1.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "Condition `lo < hi` stops when lo == hi, so an element sitting in the final one-wide window is never checked.",
+          "required": true,
+          "concept_tags": [
+            "loop_invariants",
+            "off_by_one"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: use `lo <= hi`.",
+          "required": true,
+          "concept_tags": [
+            "correctness"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Concrete failing case: searching for the last element (e.g. 9 in [1,3,5,7,9]) returns -1.",
+          "required": false,
+          "concept_tags": [
+            "edge_cases"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Complexity is still O(log n); the defect is correctness, not performance.",
+          "required": false,
+          "concept_tags": [
+            "complexity_analysis"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "search.py",
+            "line": 4
+          },
+          "why_it_looks_wrong": "`mid = (lo + hi) // 2` is the famous integer-overflow binary-search bug.",
+          "why_its_actually_fine": "Python ints are arbitrary-precision, so there is no overflow here \u2014 flagging it shows pattern-matching, not reasoning about this language."
+        }
+      ],
+      "verification": {
+        "method": [
+          "hidden_test"
+        ],
+        "hidden_tests": [
+          {
+            "input": "[1,3,5,7,9], 9",
+            "expected": "4",
+            "observed": "-1",
+            "fault_triggers": true
+          },
+          {
+            "input": "[1,3,5,7,9], 5",
+            "expected": "2",
+            "observed": "2",
+            "fault_triggers": false
+          }
+        ],
+        "static_findings": [
+          "binary search loop uses strict `<` bound"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "rubric": {
+        "detection_weight": 0.45,
+        "explanation_weight": 0.35,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {
+          "off_by_one": [
+            "o2"
+          ],
+          "correctness": [
+            "o3"
+          ]
+        }
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "D3-1",
+      "company_id": "netsol",
+      "domain": "database",
+      "level": "engineer",
+      "role_tags": [
+        "backend",
+        "data_engineer"
+      ],
+      "mode": "comprehension",
+      "language": "sql",
+      "blueprint_ref": "bp_netsol_database_engineer",
+      "prompt": "This query is meant to report total order revenue. Read it and explain the result it actually produces.",
+      "artifact": {
+        "files": [
+          {
+            "path": "revenue.sql",
+            "content": "SELECT SUM(o.total)\nFROM orders o\nJOIN order_tags t ON o.id = t.order_id;\n"
+          }
+        ],
+        "entrypoint": "revenue.sql",
+        "schema": "orders(id, customer_id, total); order_tags(order_id, tag)  -- an order can have many tags"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "DB-WRONG-JOIN",
+        "category": "database",
+        "location": {
+          "file": "revenue.sql",
+          "line_start": 3,
+          "line_end": 3,
+          "symbol": "JOIN order_tags"
+        },
+        "description": "Joining orders (1) to order_tags (many) fans each order out to one row per tag, so SUM(o.total) counts an order's total once per tag -> inflated revenue.",
+        "severity": "high"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "The query is trying to total all order revenue.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "The join to order_tags is one-to-many, duplicating each order's row per tag, so SUM(o.total) double/triple-counts.",
+          "required": true,
+          "concept_tags": [
+            "join_semantics",
+            "fan_out"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: sum from orders alone (no tag join), or aggregate tags in a separate subquery.",
+          "required": true,
+          "concept_tags": [
+            "query_design"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "Inflation scales with tags per order (an order with 3 tags is counted 3x).",
+          "required": false,
+          "concept_tags": [
+            "data_reasoning"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Correct result 10,000; this query returns 18,000.",
+          "required": false,
+          "concept_tags": [
+            "result_reasoning"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "revenue.sql",
+            "line": 1
+          },
+          "why_it_looks_wrong": "A scalar SUM with no GROUP BY can look like it's missing a grouping clause.",
+          "why_its_actually_fine": "A single aggregate over the whole result set needs no GROUP BY \u2014 that is not the defect."
+        }
+      ],
+      "verification": {
+        "method": [
+          "query_diff"
+        ],
+        "query_diff": {
+          "faulty": "SUM over orders JOIN order_tags = 18000.0",
+          "correct": "SUM(total) FROM orders = 10000.0",
+          "differ": true,
+          "fault_triggers": true
+        },
+        "static_findings": [
+          "aggregate over a one-to-many join without de-duplication"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "rubric": {
+        "detection_weight": 0.4,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.2,
+        "concept_mastery_map": {
+          "join_semantics": [
+            "o2"
+          ],
+          "query_design": [
+            "o3"
+          ]
+        }
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    },
+    {
+      "item_id": "D3-2",
+      "company_id": "techlogix",
+      "domain": "database",
+      "level": "engineer",
+      "role_tags": [
+        "backend",
+        "data_analyst"
+      ],
+      "mode": "comprehension",
+      "language": "sql",
+      "blueprint_ref": "bp_techlogix_database_engineer",
+      "prompt": "This query should list each customer with their number of orders, including customers with none. Explain what it actually returns.",
+      "artifact": {
+        "files": [
+          {
+            "path": "orders_per_customer.sql",
+            "content": "SELECT c.name, COUNT(*)\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nGROUP BY c.name;\n"
+          }
+        ],
+        "entrypoint": "orders_per_customer.sql",
+        "schema": "customers(id, name); orders(id, customer_id)"
+      },
+      "fault_label": {
+        "present": true,
+        "fault_id": "DB-GROUPBY-ERR",
+        "category": "database",
+        "location": {
+          "file": "orders_per_customer.sql",
+          "line_start": 1,
+          "line_end": 1,
+          "symbol": "COUNT(*)"
+        },
+        "description": "With a LEFT JOIN, a customer with no orders still yields one NULL-padded row; COUNT(*) counts that row as 1 instead of 0. COUNT(o.id) counts non-null order ids -> 0.",
+        "severity": "medium"
+      },
+      "expected_observations": [
+        {
+          "obs_id": "o1",
+          "statement": "Intends to count orders per customer, keeping customers with zero orders.",
+          "required": true,
+          "concept_tags": [
+            "purpose"
+          ]
+        },
+        {
+          "obs_id": "o2",
+          "statement": "COUNT(*) counts the single NULL-padded row a LEFT JOIN emits for an order-less customer, so they show 1 instead of 0.",
+          "required": true,
+          "concept_tags": [
+            "null_semantics",
+            "aggregate_semantics"
+          ]
+        },
+        {
+          "obs_id": "o3",
+          "statement": "Fix: COUNT(o.id) (any non-null column from the orders side).",
+          "required": true,
+          "concept_tags": [
+            "query_design"
+          ]
+        },
+        {
+          "obs_id": "o4",
+          "statement": "The GROUP BY and LEFT JOIN are otherwise correct; only the COUNT argument is wrong.",
+          "required": false,
+          "concept_tags": [
+            "precision"
+          ]
+        },
+        {
+          "obs_id": "o5",
+          "statement": "Demonstrates the difference between COUNT(*) and COUNT(column) under NULLs.",
+          "required": false,
+          "concept_tags": [
+            "terminology"
+          ]
+        }
+      ],
+      "decoys": [
+        {
+          "location": {
+            "file": "orders_per_customer.sql",
+            "line": 4
+          },
+          "why_it_looks_wrong": "`GROUP BY c.name` could be flagged as unsafe if two customers share a name.",
+          "why_its_actually_fine": "A reasonable robustness note, but not the bug under test; with the given data it groups correctly."
+        }
+      ],
+      "verification": {
+        "method": [
+          "query_diff"
+        ],
+        "query_diff": {
+          "faulty": "COUNT(*): Chaudhry=1",
+          "correct": "COUNT(o.id): Chaudhry=0",
+          "differ": true,
+          "fault_triggers": true
+        },
+        "static_findings": [
+          "COUNT(*) over LEFT JOIN result set"
+        ],
+        "status": "verified",
+        "verified_at": "2026-10-10T00:00:00Z"
+      },
+      "rubric": {
+        "detection_weight": 0.35,
+        "explanation_weight": 0.4,
+        "calibration_weight": 0.25,
+        "concept_mastery_map": {
+          "null_semantics": [
+            "o2"
+          ],
+          "query_design": [
+            "o3"
+          ]
+        }
+      },
+      "irt": {
+        "a": null,
+        "b": null,
+        "calibrated": false
+      },
+      "novelty": {
+        "max_similarity_to_public": 0.0,
+        "passed": true
+      },
+      "provenance": {
+        "generated_by": "seed_authored",
+        "seed_exemplars": [],
+        "created_at": "2026-10-10T00:00:00Z"
+      }
+    }
+  ]
+}

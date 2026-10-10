@@ -1,0 +1,23 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+# node
+node_modules/
+.next/
+out/
+# env & secrets
+.env
+.env.local
+# models & data artifacts
+*.pt
+*.onnx
+models/
+media/
+# os / editor
+.DS_Store
+*.log
+*.db

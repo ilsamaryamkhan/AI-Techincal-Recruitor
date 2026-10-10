@@ -1,0 +1,11 @@
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+pydantic==2.*
+pydantic[email]==2.*
+sqlalchemy==2.*
+python-jose[cryptography]==3.*
+passlib==1.7.*
+jsonschema==4.*
+# Postgres driver — only needed when you point DATABASE_URL at Postgres:
+# psycopg2-binary==2.9.*
+httpx

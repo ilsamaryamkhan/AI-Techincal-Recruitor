@@ -1,0 +1,11 @@
+{
+  "python.testing.pytestEnabled": true,
+  "editor.rulers": [
+    100
+  ],
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.venv": true
+  }
+}

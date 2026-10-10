@@ -1,0 +1,47 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "name": "api (backend)",
+      "path": "services/api"
+    },
+    {
+      "name": "generation (ml)",
+      "path": "services/generation"
+    },
+    {
+      "name": "scoring (ml)",
+      "path": "services/scoring"
+    },
+    {
+      "name": "proctoring (cv)",
+      "path": "services/proctoring"
+    },
+    {
+      "name": "interview (ilsa)",
+      "path": "services/interview"
+    },
+    {
+      "name": "frontend (ilsa)",
+      "path": "frontend"
+    }
+  ],
+  "settings": {
+    "python.analysis.typeCheckingMode": "basic",
+    "editor.formatOnSave": true,
+    "[python]": {
+      "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/.venv": true,
+      "**/node_modules": true
+    }
+  }
+}
